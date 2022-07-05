@@ -1,0 +1,116 @@
+1:
+MariaDB [guest_house]> select hotelname from hotel where hotelname like '__t%' order by hotelname DESC;
++-----------+
+| hotelname |
++-----------+
+| Watergate |
+| Latham    |
++-----------+
+2 rows in set (0.001 sec)
+
+
+
+2:
+MariaDB [guest_house]> select booking.hotelno,booking.roomno, guest.guestno, guest.guestname, guest.guestaddress
+    -> from booking inner join guest
+    -> on guest.guestno = booking.guestno
+    -> where guest.guestaddress like '%Glasgow' and
+    -> guest.guestname like 'Tony%' or guest.guestname like '%Farrel' ;
++---------+--------+---------+--------------+----------------------+
+| hotelno | roomno | guestno | guestname    | guestaddress         |
++---------+--------+---------+--------------+----------------------+
+| fb01    |    501 |   10005 | Carol Farrel | 6 Achray St, Glasgow |
+| dc01    |   1001 |   10007 | Tony Shaw    | 12 Park Pl, Glasgow  |
++---------+--------+---------+--------------+----------------------+
+2 rows in set (0.001 sec)
+
+
+
+3:
+MariaDB [guest_house]> select room.roomno, room.hotelno, hotel.hotelname from room inner join hotel on hotel.hotelno = room.hotelno where room.price =  ( select max(price) from room where price < ( select max(price) from room ) );
++--------+---------+---------------+
+| roomno | hotelno | hotelname     |
++--------+---------+---------------+
+|   1101 | ch01    | Omni Shoreham |
++--------+---------+---------------+
+1 row in set (0.001 sec)
+
+
+
+
+
+
+5:
+MariaDB [guest_house]> select room.roomno, room.hotelno, hotel.hotelname
+    -> from room inner join hotel on
+    -> hotel.hotelno = room.hotelno
+    -> where room.price =
+    -> ( select min(price) from room where price > ( select min(price) from room where price > (select min(price) from room) ) )
+    -> and room.type = 'single';
++--------+---------+-----------+
+| roomno | hotelno | hotelname |
++--------+---------+-----------+
+|    901 | dc01    | Latham    |
++--------+---------+-----------+
+1 row in set (0.001 sec)
+
+
+
+
+6:MariaDB [guest_house]> select distinct(hotelno) from room where type = 'family' in (select hotelno from room where type = 'double' not in(select hotelno from room where type = 'single') );
+
+
+
+7:
+MariaDB [guest_house]> select distinct(hotelno) from room where type = 'single' in (select hotelno from room where type = 'double' not in(select hotelno from room where type = 'family') );
+
+
+8:
+MariaDB [guest_house]> select room.hotelno, hotel.hotelname, distinct(room.roomno) from room inner join hotel on hotel.hotelno = room.hotelno where room.type = 'family' or room.type = 'double' and room.price < 40 group by roomno asc;
+
+
+
+
+
+
+9:
+MariaDB [guest_house]> select room.type, room.price
+    -> from room
+    -> inner join hotel on
+    -> hotel.hotelno = room.hotelno
+    -> where hotelname = 'Grosvenor';
++--------+-------+
+| type   | price |
++--------+-------+
+| single | 19.00 |
+| double | 29.00 |
+| family | 39.00 |
++--------+-------+
+3 rows in set (0.001 sec)
+
+
+
+10:
+MariaDB [guest_house]> select * from guest inner join booking on guest.guestno = booking.guestno inner join hotel on booking.hotelno = hotel.hotelno where hotelname = 'Watergate';
++---------+--------------+-----------------------+---------+---------+------------+------------+--------+---------+-----------+-------+
+| guestno | guestname    | guestaddress          | hotelno | guestno | datefrom   | dateto     | roomno | hotelno | hotelname | city  |
++---------+--------------+-----------------------+---------+---------+------------+------------+--------+---------+-----------+-------+
+|   10001 | John Kay     | 56 High St, London    | fb02    |   10001 | 2004-04-05 | 2022-02-03 |   1001 | fb02    | Watergate | Paris |
+|   10003 | Mary Tregear | 5 Tarbot Rd, Aberdeen | fb02    |   10003 | 2004-04-05 | 2010-04-04 |   1001 | fb02    | Watergate | Paris |
++---------+--------------+-----------------------+---------+---------+------------+------------+--------+---------+-----------+-------+
+2 rows in set (0.001 sec)
+
+
+
+
+12:
+MariaDB [guest_house]> select distinct(hotel.hotelname), hotel.city, booking.roomno from hotel inner join booking on hotel.hotelno = booking.hotelno where hotel.city='London';
++---------------+--------+--------+
+| hotelname     | city   | roomno |
++---------------+--------+--------+
+| Omni Shoreham | London |   1101 |
+| Phoenix Park  | London |    801 |
+| Grosvenor     | London |    501 |
+| Grosvenor     | London |    701 |
+| Grosvenor     | London |    601 |
++---------------+--------+--------+

@@ -1,0 +1,11 @@
+E 5.1:
+select distinct(EMP_FNAME), EMP_LNAME, HOUR_RATE from EMPLOYEE inner join HOURS on EMPLOYEE.EMP_NUM = HOURS.EMP_NUM having HOURS.HOUR_RATE > (select avg(HOUR_RATE) from HOURS);
+
+
+E 5.2:
+select distinct(EMP_FNAME), EMP_LNAME,DATE_WORKED ,(select avg(HOUR_RATE) from HOURS) as AVERAGE,HOUR_RATE-(select avg(HOUR_RATE) from HOURS) as DIFFERENCE from EMPLOYEE,HOURS;
+
+
+E 5.3:
+select ATTRACT_CAPACITY from ATTRACTION where ATTRACT_CAPACITY <= (select avg(ATTRACT_CAPACITY) from ATTRACTION);
+

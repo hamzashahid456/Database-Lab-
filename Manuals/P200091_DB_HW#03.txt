@@ -1,0 +1,212 @@
+XXXXXXXXXXXXXXX
+  QUESTION#01
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT HOTELNAME FROM HOTEL WHERE HOTELNAME LIKE '__t%' ORDER BY HOTELNAME DESC;
++-----------+
+| HOTELNAME |
++-----------+
+| Watergate |
+| Latham    |
++-----------+
+2 rows in set (0.000 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#02
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT HOTELNO,HOTELNAME,ROOMNO,GUESTNO,GUESTNAME,GUESTADDRESS
+    -> FROM BOOKING NATURAL JOIN HOTEL NATURAL JOIN GUEST
+    -> WHERE GUESTNAME LIKE 'Tony%' OR GUESTNAME LIKE '%Farrel' AND GUESTADDRESS LIKE '%Glasgow';
++---------+-----------+--------+---------+--------------+----------------------+
+| HOTELNO | HOTELNAME | ROOMNO | GUESTNO | GUESTNAME    | GUESTADDRESS         |
++---------+-----------+--------+---------+--------------+----------------------+
+| dc01    | Latham    |   1001 |   10007 | Tony Shaw    | 12 Park Pl, Glasgow  |
+| fb01    | Grosvenor |    501 |   10005 | Carol Farrel | 6 Achray St, Glasgow |
++---------+-----------+--------+---------+--------------+----------------------+
+2 rows in set (0.000 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#03
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT ROOMNO,HOTELNO,HOTELNAME,MAX(PRICE) AS PRICE FROM ROOM NATURAL JOIN HOTEL
+    -> WHERE PRICE NOT IN (SELECT MAX(PRICE) FROM ROOM);
++--------+---------+---------------+-------+
+| ROOMNO | HOTELNO | HOTELNAME     | PRICE |
++--------+---------+---------------+-------+
+|   1001 | ch01    | Omni Shoreham | 59.99 |
++--------+---------+---------------+-------+
+1 row in set (0.001 sec)
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#04
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT ROOMNO,HOTELNO,HOTELNAME FROM HOTEL NATURAL JOIN BOOKING
+    -> WHERE YEAR(DATEFROM) BETWEEN 2005 AND 2010;
++--------+---------+-----------+
+| ROOMNO | HOTELNO | HOTELNAME |
++--------+---------+-----------+
+|   1001 | dc01    | Latham    |
++--------+---------+-----------+
+1 row in set (0.000 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#05
+XXXXXXXXXXXXXXX
+
+MariaDB [guest_house]> SELECT ROOMNO,HOTELNO,HOTELNAME,PRICE
+    -> FROM ROOM NATURAL JOIN HOTEL
+    -> WHERE PRICE = (SELECT DISTINCT(PRICE)
+    ->          FROM ROOM
+    ->          ORDER BY PRICE ASC
+    ->          LIMIT 2,1)
+    -> AND TYPE = 'single';
++--------+---------+-----------+-------+
+| ROOMNO | HOTELNO | HOTELNAME | PRICE |
++--------+---------+-----------+-------+
+|    901 | dc01    | Latham    | 18.00 |
++--------+---------+-----------+-------+
+1 row in set (0.027 sec)
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#06
+XXXXXXXXXXXXXXX
+
+
+MariaDB [guest_house]> SELECT DISTINCT(HOTELNAME)
+    ->  FROM HOTEL NATURAL JOIN ROOM
+    ->  WHERE TYPE = 'double' AND HOTELNAME IN (SELECT DISTINCT(HOTELNAME)
+    ->  FROM HOTEL NATURAL JOIN ROOM
+    ->  WHERE TYPE = 'family');
++-----------+
+| HOTELNAME |
++-----------+
+| Latham    |
+| Grosvenor |
++-----------+
+2 rows in set (0.001 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#07
+XXXXXXXXXXXXXXX
+
+
+MariaDB [guest_house]> SELECT HOTELNO,HOTELNAME FROM HOTEL NATURAL JOIN ROOM WHERE TYPE = 'single' AND HOTELNAME IN (
+    -> SELECT DISTINCT(HOTELNAME) FROM HOTEL NATURAL JOIN ROOM WHERE TYPE = 'double' AND HOTELNAME NOT IN(
+    -> SELECT DISTINCT(HOTELNAME) FROM HOTEL NATURAL JOIN ROOM WHERE TYPE = 'family'));
++---------+--------------+
+| HOTELNO | HOTELNAME    |
++---------+--------------+
+| ch02    | Phoenix Park |
+| fb02    | Watergate    |
++---------+--------------+
+2 rows in set (0.001 sec)
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#08
+XXXXXXXXXXXXXXX
+
+MariaDB [guest_house]> SELECT ROOMNO,HOTELNO,HOTELNAME
+    -> FROM ROOM NATURAL JOIN HOTEL
+    -> WHERE TYPE = 'double' OR TYPE = 'family'
+    -> AND PRICE < 40
+    -> ORDER BY PRICE ASC;
++--------+---------+--------------+
+| ROOMNO | HOTELNO | HOTELNAME    |
++--------+---------+--------------+
+|    801 | ch02    | Phoenix Park |
+|    601 | fb01    | Grosvenor    |
+|   1001 | dc01    | Latham       |
+|   1101 | dc01    | Latham       |
+|    701 | fb01    | Grosvenor    |
+|   1101 | fb02    | Watergate    |
++--------+---------+--------------+
+6 rows in set (0.001 sec)
+
+XXXXXXXXXXXXXXX
+  QUESTION#09
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT ROOMNO,TYPE,PRICE
+    -> FROM ROOM NATURAL JOIN HOTEL
+    -> WHERE HOTELNAME = 'Grosvenor';
++--------+--------+-------+
+| ROOMNO | TYPE   | PRICE |
++--------+--------+-------+
+|    501 | single | 19.00 |
+|    601 | double | 29.00 |
+|    701 | family | 39.00 |
++--------+--------+-------+
+3 rows in set (0.000 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#10
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT GUESTNO,GUESTNAME
+    -> FROM BOOKING NATURAL JOIN HOTEL NATURAL JOIN GUEST
+    -> WHERE HOTELNAME = 'Watergate' AND DATETO = NULL;
+Empty set (0.023 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#11
+XXXXXXXXXXXXXXX
+
+
+
+MariaDB [guest_house]> SELECT HOTELNAME
+    -> FROM ROOM NATURAL JOIN HOTEL
+    -> GROUP BY HOTELNAME
+    -> HAVING COUNT(*) > 2;
++-----------+
+| HOTELNAME |
++-----------+
+| Grosvenor |
+| Latham    |
++-----------+
+2 rows in set (0.001 sec)
+
+
+
+XXXXXXXXXXXXXXX
+  QUESTION#12
+XXXXXXXXXXXXXXX
+
+MariaDB [guest_house]> SELECT HOTELNAME,COUNT(*) AS ROOMS FROM ROOM NATURAL JOIN HOTEL WHERE CITY = 'London' GROUP BY HOTELNAME;
++---------------+-------+
+| HOTELNAME     | ROOMS |
++---------------+-------+
+| Grosvenor     |     3 |
+| Omni Shoreham |     2 |
+| Phoenix Park  |     2 |
++---------------+-------+
+3 rows in set (0.000 sec)
